@@ -7,9 +7,14 @@ const jwt = require("jsonwebtoken");
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(401).json({ message: "User already exists" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword });
     await user.save();
+
     res.status(201).json({ message: "User Registration successful" });
   } catch (error) {
     res.status(500).json({ error: "Registration failed" });
@@ -35,6 +40,10 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Login Failed" });
   }
+});
+
+router.post("/logout", (req, res) => {
+  res.status(200).json({ message: "Logout successful" });
 });
 
 module.exports = router;
